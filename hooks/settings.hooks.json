@@ -1,0 +1,71 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/project-map/bin/post-edit.sh\"",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=$(git -C \"${CLAUDE_PROJECT_DIR:-.}\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && [ -x \"$d/agent-bus/bin/retire.sh\" ] && bash \"$d/agent-bus/bin/retire.sh\" || true"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=$(git -C \"${CLAUDE_PROJECT_DIR:-.}\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && [ -x \"$d/agent-bus/bin/session-start.sh\" ] && bash \"$d/agent-bus/bin/session-start.sh\" || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/project-map/bin/session-start.sh\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=$(git -C \"${CLAUDE_PROJECT_DIR:-.}\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && [ -x \"$d/agent-bus/bin/read-delta.sh\" ] && bash \"$d/agent-bus/bin/read-delta.sh\" || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=$(git -C \"${CLAUDE_PROJECT_DIR:-.}\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && [ -x \"$d/agent-bus/bin/auto-post.sh\" ] && bash \"$d/agent-bus/bin/auto-post.sh\" || true",
+            "async": true
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/project-map/bin/on-prompt.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
