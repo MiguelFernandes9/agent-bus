@@ -1,0 +1,41 @@
+name: CI
+
+# Syntax-check every script and run the test suites on macOS and Linux.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax-check shell scripts
+        run: |
+          find . -name '*.sh' -not -path './.git/*' -print0 \
+            | xargs -0 -n1 bash -n
+
+      - name: Syntax-check Python scripts
+        run: python3 -m py_compile project-map/bin/*.py
+
+      - name: Event-log tests
+        run: bash agent-bus/tests/events.test.sh
+
+      - name: Auto-post hook tests
+        run: bash agent-bus/tests/auto-post.test.sh
