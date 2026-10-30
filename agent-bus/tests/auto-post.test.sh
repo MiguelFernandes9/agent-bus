@@ -10,6 +10,7 @@ pass=0; fail=0
 ok()   { printf '  ok   %s\n' "$1"; pass=$((pass+1)); }
 bad()  { printf '  FAIL %s\n    expected: [%s]\n    got:      [%s]\n' "$1" "$2" "$3"; fail=$((fail+1)); }
 eq()   { [ "$2" = "$3" ] && ok "$1" || bad "$1" "$3" "$2"; }   # eq name actual expected
+mtime() { stat -c %Y "$1" 2>/dev/null || stat -f %m "$1"; }   # GNU, then BSD/macOS
 
 echo "== unit: humanize_slug =="
 eq "feat/ prefix stripped, dashes->spaces" "$(humanize_slug feat/bus-auto-write)" "bus auto write"
@@ -38,7 +39,7 @@ mkrepo() {  # echoes path to a fresh initialized bus repo
   local d; d=$(bus_dir_for "$r"); ensure_layout "$d"
   printf '%s\n' "$r"
 }
-run_autopost() { ( cd "$1" && AGENTBUS_AGENT="$2" bash "$BIN/auto-post.sh" >/dev/null 2>&1 ); }
+run_autopost() { ( cd "$1" && AGENTBUS_AGENT="$2" bash "$BIN/auto-post.sh" </dev/null >/dev/null 2>&1 ); }
 snapf() { local d; d=$(bus_dir_for "$1"); printf '%s/current/%s.md' "$d" "$2"; }
 field() { sed -n "s/^$3: //p" "$(snapf "$1" "$2")" | head -1; }
 
@@ -53,10 +54,10 @@ eq "branch recorded"             "$(field "$R" "$A" branch)"  "feat/foo-bar"
 eq "touched = in-flight file"    "$(field "$R" "$A" touched)" "work.txt"
 
 echo "== integration: idempotent no-op (no mtime bump) =="
-before=$(stat -f %m "$(snapf "$R" "$A")")
+before=$(mtime "$(snapf "$R" "$A")")
 sleep 1
 run_autopost "$R" "$A"
-after=$(stat -f %m "$(snapf "$R" "$A")")
+after=$(mtime "$(snapf "$R" "$A")")
 eq "unchanged state -> snapshot not rewritten" "$after" "$before"
 
 echo "== integration: touched clears after commit (in-flight everywhere) =="

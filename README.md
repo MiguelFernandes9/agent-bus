@@ -1,5 +1,7 @@
 # agent-bus
 
+[![CI](https://github.com/MiguelFernandes9/agent-bus/actions/workflows/ci.yml/badge.svg)](https://github.com/MiguelFernandes9/agent-bus/actions/workflows/ci.yml)
+
 **Let several Claude Code sessions work on one repository at the same time, and know about each other.**
 
 When you run several [Claude Code](https://claude.com/claude-code) agents in
@@ -159,6 +161,8 @@ local context such as `CLAUDE.local.md` into it. It refuses to run unless
 bash agent-bus/tests/events.test.sh      # event log: seq, ring cap, read cursor
 bash agent-bus/tests/auto-post.test.sh   # snapshot hook: idempotence, field preservation
 ```
+
+CI runs both suites, plus a syntax check of every script, on macOS and Linux.
 
 ## Uninstall
 
